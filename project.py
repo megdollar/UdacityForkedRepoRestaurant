@@ -57,7 +57,7 @@ def fbconnect():
     userinfo_url = "https://graph.facebook.com/v2.2/me"
     #strip expire tag from access token
     data = json.loads(result)
-    token = 'access_token' + data['access_token']
+    token = 'access_token=' + data['access_token']
 
     url = 'https://graph.facebook.com/v2.8/me?%s&fields=name,id,email' % token
     h = httplib2.Http()
