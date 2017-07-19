@@ -36,7 +36,6 @@ def showLogin():
     # return "The current session state is %s" % login_session['state']
     return render_template('login.html', STATE=state)
 
-@app.route('/fbconnect', methods=['POST'])
  # FB login
 @app.route('/fbconnect', methods=['POST'])
 def fbconnect():
@@ -58,7 +57,7 @@ def fbconnect():
     userinfo_url = "https://graph.facebook.com/v2.2/me"
     #strip expire tag from access token
     data = json.loads(result)
-    token = 'access_token=' + data['access_token']
+    token = 'access_token' + data['access_token']
 
     url = 'https://graph.facebook.com/v2.8/me?%s&fields=name,id,email' % token
     h = httplib2.Http()
@@ -87,7 +86,7 @@ def fbconnect():
     login_session['picture'] = data['data']['url']
 
     #check if user exists
-    user_id = getUserIDe(login_session['email'])
+    user_id = getUserID(login_session['email'])
     if not user_id:
         user_id = createUserE(login_session)
     login_session['user_id'] = user_id
@@ -251,14 +250,13 @@ def getUserID(email):
 @app.route('/gdisconnect')
 def gdisconnect():
     # Only disconnect a connected user.
-    credentials = login_session.get('credentials')
+    credentials = login_session.get('access_token')
     if credentials is None:
         response = make_response(
             json.dumps('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-    access_token = credentials.access_token
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % credentials
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     if result['status'] != '200':
@@ -441,7 +439,7 @@ def disconnect():
         if login_session['provider'] == 'google':
             gdisconnect()
             del login_session['gplus_id']
-            del login_session['credentials']
+            del login_session['access_token']
         if login_session['provider'] == 'facebook':
             fbdisconnect()
             del login_session['facebook_id']
